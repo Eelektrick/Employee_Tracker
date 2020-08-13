@@ -64,3 +64,46 @@ function startProgram(){
         }
     })
 };
+
+function ViewAllEmployees(){
+    console.log("Viewing all Employees");
+    console.log("-------------------");
+
+    let query = "SELECT e.id , e.first_name, e.last_name, r.title,  d.name as department, r.salary, CONCAT(m.first_name,' ',m.last_name) as manager from employee e ";
+    query +="LEFT JOIN role r ON e.role_id = r.id";
+    query +="LEFT JOIN department d ON r.department_id = d.id";
+    query +="LEFT JOIN employee m ON m.id = e.manager_id";
+
+    conn.query(query,function(err,res){
+        console.log(res.length + " matches found!");
+
+        console.table(res);
+        startProgram();
+    });
+}
+
+function ViewByDept(){
+
+}
+
+function ViewByManager(){
+    
+}
+
+function AddEmployee(){
+    
+}
+
+function RemoveEmployee(){
+    
+}
+
+function UpdateRole(){
+    
+}
+
+function UpdateManager(){
+    
+}
+
+startProgram();

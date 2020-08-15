@@ -154,6 +154,10 @@ async function AddEmployee(){
         roleChoice.push(role[i].title);
     }
 
+    for(var i =0; i<employee.length; i++){
+        managerChoice.push(employee[i].managerName);
+    }
+
     inquirer.prompt([
         {
             name:"firstName",
@@ -283,7 +287,48 @@ function DeleteRole(){
 }
 
 function DeleteDept(){
+    var choiceA = [];
+    var department = await getAllDept();
 
+    for (var i = 0; i < department.length; i++) {
+        choiceA.push("ID: " + department[i].id + " Department Name: " + department[i].name);
+    }
+
+    inquirer.prompt([
+        {
+            name: "employee",
+            type: "rawlist",
+            message: "Which department you wish to remove?",
+            choices: choiceA
+        }
+    ])
+    .then(async function (answer) {
+
+        var id = answer.employee.split(" ", 2)[1];
+        console.log(JSON.parse(id));
+
+        connection.query("DELETE from department WHERE ?",
+            {
+                id : id
+            },
+    
+            function (err, res){
+        
+                if (err){
+                if( err.errno === 1451) {
+                
+                console.log("There are employees associated with the department. DELETE the employees before trying to delete the department");
+                
+                return inquirerPrompts();
+                } else throw err;
+                } else if(res.affectedRows === 1) {
+            
+                    console.log("The Department got removed successfully");
+                    return inquirerPrompts();
+                }
+            } 
+        );
+    });
 }
 
 async function getAllEmployees(){
@@ -304,6 +349,11 @@ async function getRoleOnTitle(role){
 async function getEmployeeOnName(name){
     conn.query = util.promisify(conn.query);
     return await conn.query("SELECT * from employee where employee.first_name LIKE ?" , [name]);
+}
+
+async function getAllDept() {
+    conn.query = util.promisify(conn.query);
+    return await conn.query("SELECT id, name from department");  
 }
 
 //Validate information

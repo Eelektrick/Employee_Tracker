@@ -220,10 +220,62 @@ function AddRole(){
 
 function AddDept(){
 
+    inquirer.prompt([
+        {
+            name:"deptName",
+            type:"input",
+            message:"Please enter the department name you wish to add",
+            validate:inputValidation
+        }
+    ])
+    .then(async function(answer){
+        conn.query("INSERT INTO department SET ?",
+            {
+                name: answer.deptName
+            },
+            function(err){
+                if(err) throw err;
+                console.log("Department was enter successfully");
+
+                startProgram();
+            }
+        );
+    });
 }
 
 function DeleteEmployee(){
-    
+    let choiceA = [];
+
+    let employee = await getAllEmployees();
+
+    for(var i=0; i< employee.length; i++){
+        choiceA.push("ID: " + employee[i].id + "Employee Name: " + employee[i].managerName);
+    }
+
+    inquirer.prompt([
+        {
+            name:"employee",
+            type:"rawlist",
+            message:"Which employee do you wish to remove?",
+            choices: choiceA
+        }
+    ])
+    .then(async function(answer){
+        let id = answer.employee.split(" ",2)[1];
+        console.log(JSON.parse(id));
+
+        conn.query("DELETE FROM employee WHERE ?",
+            {
+                id:id
+            },
+            function(err){
+                if(err) throw err;
+                console.log("Removed Employee successfully");
+
+                startProgram();
+            }
+        );
+    });
 }
 
 function DeleteRole(){
@@ -244,12 +296,12 @@ async function getAllRoles(){
     return await conn.query("SELECT * from role");
 }
 
-async function getRoleOnTitle(){
+async function getRoleOnTitle(role){
     conn.query = util.promisify(conn.query);
     return await conn.query("SELECT * from role where role.title = ?" , [role]);
 }
 
-async function getEmployeeOnName(){
+async function getEmployeeOnName(name){
     conn.query = util.promisify(conn.query);
     return await conn.query("SELECT * from employee where employee.first_name LIKE ?" , [name]);
 }

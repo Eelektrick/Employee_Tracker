@@ -102,6 +102,7 @@ function ViewAllEmployees(){
 }
 
 function ViewByDept(){
+
     let query = "SELECT d.name AS department, r.title, e.id, e.first_name, e.last_name FROM employee e";
     query +="LEFT JOIN role r ON (r.id = e.role_id)";
     query +="LEFT JOIN department d ON (d.id = r.department_id)";
@@ -117,7 +118,20 @@ function ViewByDept(){
 }
 
 function ViewByManager(){
-    
+
+    let query ="SELECT CONCAT(m.first_name,' ',m.last_name) AS manager, d.name AS department, e.id, e.first_name, e.last_name, r.title FROM employee e";
+    query +="LEFT JOIN employee m ON m.id = e.manager_id";
+    query +="INNER JOIN role r ON (r.id = e.role_id && e.manager_id != 'NULL')";
+    query +="INNER JOIN department d ON (d.id = r.department_id)";
+    query +="ORDER BY";
+
+    conn.query(query,function(err,res){
+        if(err) throw err;
+
+        console.log("Viewing Employees by Manager");
+        console.log("---------------------------");
+        console.table(res);
+    });    
 }
 
 function UpdateRole(){

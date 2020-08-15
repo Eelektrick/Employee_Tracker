@@ -142,8 +142,76 @@ function UpdateManager(){
     
 }
 
-function AddEmployee(){
+async function AddEmployee(){
     
+    let roleChoice = [];
+    let managerChoice = ["None"];
+
+    let role = await getAllRoles();
+    let employee = await getAllEmployees();
+
+    for (var i=0; i<role.length; i++){
+        roleChoice.push(role[i].title);
+    }
+
+    inquirer.prompt([
+        {
+            name:"firstName",
+            type:"input",
+            message:"PLease enter employee's first name",
+            validate:inputValidation
+        },
+        {
+            name:"lastName",
+            type:"input",
+            message:"Please enter employee's last name",
+            validate:inputValidation
+        },
+        {
+            name:"role",
+            type:"rawlist",
+            choices: roleChoice
+        },
+        {
+            name:"managerName",
+            type:"rawlist",
+            choices:managerChoice
+        }
+    ])
+    .then(async function(answer){
+
+        let newDeptId = await getRoleOnTitle(answer.role);
+        let roleId;
+        let managerId;
+
+        newDeptId.find(depId => {
+            roleId = depId.id
+        });
+
+        let managerName = answer.managerName;
+        let firstName = managerName.split(" ",1) + "%";
+
+        let newManangerId = await getEmployeeOnName(firstName);
+
+        newManangerId.find(mngrId =>{
+            managerId = mngrId.id
+        });
+
+        conn.query("INSERT INTO employee SET ?",
+            {
+                first_name: answer.firstName,
+                last_name: answer.lastName,
+                role_id: roleId,
+                manager_id: managerId
+            },
+            function(err){
+                if (err) throw err;
+                console.log("Employee information was inserted successfully")
+
+                startProgram();
+            }
+        );
+    });
 }
 
 function AddRole(){
@@ -164,6 +232,38 @@ function DeleteRole(){
 
 function DeleteDept(){
 
+}
+
+async function getAllEmployees(){
+    conn.query = util.promisify(conn.query);
+    return await conn.query("SELECT  id, CONCAT(employee.first_name,' ',employee.last_name) as managerName from employee");
+}
+
+async function getAllRoles(){
+    conn.query = util.promisify(conn.query);
+    return await conn.query("SELECT * from role");
+}
+
+async function getRoleOnTitle(){
+    conn.query = util.promisify(conn.query);
+    return await conn.query("SELECT * from role where role.title = ?" , [role]);
+}
+
+async function getEmployeeOnName(){
+    conn.query = util.promisify(conn.query);
+    return await conn.query("SELECT * from employee where employee.first_name LIKE ?" , [name]);
+}
+
+//Validate information
+function inputValidation(value) {
+    if (value != "" && value.match('[a-zA-Z][a-zA-Z]+$')) return true;
+    else return "Please enter correct info";
+}
+  
+function numberValidation(value){
+   
+    if (value != "" && value.match(/^[1-9]\d*$/)) return true;
+    else return "Please enter correct info"; 
 }
 
 startProgram();

@@ -93,6 +93,7 @@ function startProgram(){
     })
 };
 
+//view all employees at the job
 function ViewAllEmployees(){
 
     let query = "SELECT e.id , e.first_name, e.last_name, r.title,  d.name as department, r.salary, CONCAT(m.first_name,' ',m.last_name) as manager FROM employee e ";
@@ -111,6 +112,7 @@ function ViewAllEmployees(){
     });
 }
 
+//view employees by department
 function ViewByDept(){
 
     let query = "SELECT d.name AS department, r.title, e.id, e.first_name, e.last_name FROM employee e";
@@ -124,9 +126,12 @@ function ViewByDept(){
         console.log("Viewing Employees by department");
         console.log("-------------------------------");
         console.table(res);
+
+        startProgram();
     });
 }
 
+//view employee by manager
 function ViewByManager(){
 
     let query ="SELECT CONCAT(m.first_name,' ',m.last_name) AS manager, d.name AS department, e.id, e.first_name, e.last_name, r.title FROM employee e";
@@ -141,17 +146,43 @@ function ViewByManager(){
         console.log("Viewing Employees by Manager");
         console.log("---------------------------");
         console.table(res);
+
+        startProgram();
     });    
 }
 
 //view employees by their role
 function ViewByRole(){
+    let query = "SELECT r.id as roleId,  r.title as roleName, r.salary, r.department_id as departmentId, d.name as departmentName FROM employee e"; 
+    query += "LEFT JOIN role r on e.role_id = r.id" 
+    query +="LEFT JOIN department d on r.department_id = d.id GROUP BY r.id, r.title";
+    
+    connection.query(query, function (err, res){
+        if (err) throw err;
+          
+        console.log("Viewing By Roles");
+        console.log("----------------");
+        console.table(res);
 
+        startProgram();
+    });
 }
 
 //view a certain departments budget
 function ViewDeptBudget(){
+    let query = "SELECT d.id ,  d.name as departmentName, SUM(r.salary) as utilizedBudget FROM employee e"; 
+    query +="LEFT JOIN role r on e.role_id = r.id"; 
+    query +="LEFT JOIN department d on r.department_id = d.id GROUP BY d.id, d.name";
+    
+    conn.query(query, function(err, res){
+        if (err) throw err;
 
+        console.log("Viewing Department Budget");
+        console.log("-------------------------");
+        console.table(res);
+
+        startProgram();
+    });
 }
 
 //update to new role

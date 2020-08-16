@@ -161,7 +161,68 @@ function UpdateRole(){
 
 //update employees manager
 function UpdateManager(){
-    
+    let allEmployees = [];
+    let allManagers = ["None"];
+    let employee = await getAllEmployees();
+
+    for (var i = 0; i < employee.length; i++) {
+      allEmployees.push("ID: " + employee[i].id + " Employee Name: " + employee[i].managerName);
+      allManagers.push(employee[i].managerName);
+    }
+  
+    inquirer.prompt([
+        {
+          name: "employee",
+          type: "rawlist",
+          message: "For which employee, manager detail to be updated?",
+          choices: allEmployees
+        },
+        {
+          name: "manager",
+          type: "rawlist",
+          message: "Please select the manager for the selected employee...",
+          choices: allManagers
+        },
+    ])
+    .then(async function (answer){
+  
+        if (answer.employee.split(" ", 5)[4] ===  answer.manager.split(" ", 1)[0]) {
+
+          console.log(`Employee and manager should not be same. Please select a different manager`);
+          return UpdateManager();
+        }
+
+        let mgrName = answer.manager;
+        let mgrFirstName = mgrName.split(" ", 1) + "%";
+        let id = answer.employee.split(" ", 2)[1];
+        let mgrDetails = await getEmployeeOnName(mgrFirstName);
+        let mgrId;
+        
+        mgrDetails.find(managerId => {
+          mgrId = managerId.id
+        });
+  
+        if (mgrId === undefined){
+  
+            conn.query("UPDATE employee SET manager_id = NULL WHERE id = '" + id + "'",
+                function (err) {
+                    if (err) throw err;
+                }
+            );
+        } 
+        else{
+
+            conn.query("UPDATE employee SET manager_id = '" + mgrId + "' WHERE id = '" + id + "'",
+                function (err) {
+                    if (err) throw err;
+                }
+            );
+        }
+        
+        console.log("Employee manager details were updated successfully");
+        
+        startProgram();
+    });
 }
 
 //add an employee

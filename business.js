@@ -2,10 +2,12 @@ let mysql = require("mysql");
 let inquirer = require("inquirer");
 const util = require("util");
 let consoleTable = require("console.table");
+const { get } = require("http");
 
 let conn = mysql.createConnection({
     host:"localhost",
     port:3306,
+    //your username
     user:"root",
     //Enter your password
     password:"",
@@ -28,6 +30,8 @@ function startProgram(){
                 "View all employees",
                 "View all employees by department",
                 "View all employees by manager",
+                "View by Role",
+                "View department budget",
                 "Update Employee Role",
                 "Update Employee Manager",
                 "Add Employee",
@@ -50,6 +54,12 @@ function startProgram(){
             break;
             case"View all employees by manager":
             ViewByManager();
+            break;
+            case"View by Role":
+            ViewByRole();
+            break;
+            case"View department budget":
+            ViewDeptBudget();
             break;
             case"Update Employee Role":
             UpdateRole();
@@ -134,14 +144,27 @@ function ViewByManager(){
     });    
 }
 
+//view employees by their role
+function ViewByRole(){
+
+}
+
+//view a certain departments budget
+function ViewDeptBudget(){
+
+}
+
+//update to new role
 function UpdateRole(){
     
 }
 
+//update employees manager
 function UpdateManager(){
     
 }
 
+//add an employee
 async function AddEmployee(){
     
     let roleChoice = [];
@@ -218,10 +241,62 @@ async function AddEmployee(){
     });
 }
 
+//add a role
 function AddRole(){
+    let choiceA = [];
 
+    let dept = await getAllDept();
+
+    for(var i=0; i<dept.length; i++){
+        choiceA.push("ID: " + dept[i].id + "Department Name: " + dept[i].name);
+    }
+
+    inquirer.prompt([
+        {
+            name:"roleName",
+            type:"input",
+            meesage:"Please enter the role you desire",
+            validate: inputValidation
+        },
+        {
+            name:"roleSalary",
+            type:"input",
+            message:"Please enter the salary for the role",
+            validate: numberValidation
+        },
+        {
+            name:"deptName",
+            type:"rawlist",
+            message:"Please attach role to a department",
+            choices: choiceA
+        }
+    ])
+    .then(async function(answer){
+        let deptId;
+
+        let departName = answer.deptName.split(" ", 5)[4];
+        const newDeptId = await getDeptByName(departName);
+        newDeptId.find(departId => {
+            deptId = departId.id
+        });
+
+        conn.query("INSERT INTO role SET ?",
+            {
+                title: answer.roleName,
+                salary: answer.roleSalary,
+                department_id: deptId
+            },
+            function(err){
+                if(err) throw err;
+                console.log("Role was added successfully");
+
+                startProgram();
+            }
+        );
+    });
 }
 
+//add a department
 function AddDept(){
 
     inquirer.prompt([
@@ -247,6 +322,7 @@ function AddDept(){
     });
 }
 
+//delete employee
 function DeleteEmployee(){
     let choiceA = [];
 
@@ -282,10 +358,54 @@ function DeleteEmployee(){
     });
 }
 
+//Delete Role function
 function DeleteRole(){
+    let choiceA = [];
 
+    let roles = await getAllRoles();
+
+    for (var i = 0; i < roles.length; i++) {
+        choiceA.push("ID: " + roles[i].id + " Role Name: " + roles[i].title);
+    }
+
+    inquirer.prompt([
+        {
+            name: "employee",
+            type: "rawlist",
+            message: "Which role do you want to remove?",
+            choices: choiceA
+        }
+    ])
+    .then(async function(answer){
+        let id = answer.employee.split(" ", 2)[1];
+
+        conn.query("DELETE from role WHERE ?",
+            {
+                id : id
+            },
+            function(err, res){
+            
+                if (err){
+                    // Capture the err and tell the user that delete operation cannot be performed as this table is maaped to employee.
+                    if(err.errno === 1451) {
+                    
+                    console.log("There are employees associated with the department. DELETE THEM before trying to delete the role!");
+                    
+                    return startProgram();
+                    } 
+                    else throw err;
+                } 
+                else if(res.affectedRows === 1){                   
+                    console.log("Role was removed successfully");
+
+                    return startProgram();
+                }
+            }       
+        );
+    });
 }
 
+//Delete Department function
 function DeleteDept(){
     var choiceA = [];
     var department = await getAllDept();
@@ -319,18 +439,19 @@ function DeleteDept(){
                 
                 console.log("There are employees associated with the department. DELETE the employees before trying to delete the department");
                 
-                return inquirerPrompts();
+                return startProgram();
                 } else throw err;
                 } else if(res.affectedRows === 1) {
             
                     console.log("The Department got removed successfully");
-                    return inquirerPrompts();
+                    return startProgram();
                 }
             } 
         );
     });
 }
 
+//functions used to find info from the SQL for the other main functions
 async function getAllEmployees(){
     conn.query = util.promisify(conn.query);
     return await conn.query("SELECT  id, CONCAT(employee.first_name,' ',employee.last_name) as managerName from employee");
@@ -354,6 +475,11 @@ async function getEmployeeOnName(name){
 async function getAllDept() {
     conn.query = util.promisify(conn.query);
     return await conn.query("SELECT id, name from department");  
+}
+
+async function getDeptByName(){
+    conn.query = util.promisify(conn.query);
+    return await conn.query("SELECT * from department where name = ?", [name]);
 }
 
 //Validate information

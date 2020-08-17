@@ -10,15 +10,15 @@ let conn = mysql.createConnection({
     //your username
     user:"root",
     //Enter your password
-    password:"",
+    password:"Clara0817+",
     database:"business_db"
 });
 
-conn.connect(function(err){
-    if(err) throw err;
-    console.log("connected as id" + conn.threadId + "\n");
-    function startProgram();
-});
+// conn.connect(function(err){
+//     if(err) throw err;
+//     console.log("connected as id" + conn.threadId + "\n");
+//     function startProgram();
+// });
 
 function startProgram(){
     inquirer.prompt([
@@ -186,7 +186,7 @@ function ViewDeptBudget(){
 }
 
 //update to new role
-function UpdateRole(){
+async function UpdateRole(){
     let allEmployees = [];
     let rolechoiceA = [];
     let employee = await getAllEmployees();
@@ -237,7 +237,7 @@ function UpdateRole(){
 }
 
 //update employees manager
-function UpdateManager(){
+async function UpdateManager(){
     let allEmployees = [];
     let allManagers = ["None"];
     let employee = await getAllEmployees();
@@ -380,7 +380,7 @@ async function AddEmployee(){
 }
 
 //add a role
-function AddRole(){
+async function AddRole(){
     let choiceA = [];
 
     let dept = await getAllDept();
@@ -435,7 +435,7 @@ function AddRole(){
 }
 
 //add a department
-function AddDept(){
+async function AddDept(){
 
     inquirer.prompt([
         {
@@ -461,7 +461,7 @@ function AddDept(){
 }
 
 //delete employee
-function DeleteEmployee(){
+async function DeleteEmployee(){
     let choiceA = [];
 
     let employee = await getAllEmployees();
@@ -497,7 +497,7 @@ function DeleteEmployee(){
 }
 
 //Delete Role function
-function DeleteRole(){
+async function DeleteRole(){
     let choiceA = [];
 
     let roles = await getAllRoles();
@@ -544,7 +544,7 @@ function DeleteRole(){
 }
 
 //Delete Department function
-function DeleteDept(){
+async function DeleteDept(){
     var choiceA = [];
     var department = await getAllDept();
 

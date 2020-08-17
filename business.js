@@ -9,7 +9,7 @@ let conn = mysql.createConnection({
     port:3306,
     //your username
     user:"root",
-    //Enter your password
+    //Please Enter your password
     password:"",
     database:"business_db"
 });
@@ -125,7 +125,7 @@ function ViewByDept(){
     });
 }
 
-//view employee by manager
+//view employees by manager
 function ViewByManager(){
 
     let query ="SELECT CONCAT(m.first_name,' ',m.last_name) AS manager, d.name AS department, e.id, e.first_name, e.last_name, r.title FROM employee e ";
@@ -162,7 +162,7 @@ function ViewByRole(){
     });
 }
 
-//view a certain departments budget
+//view all departments budget
 function ViewDeptBudget(){
     let query = "SELECT d.id ,  d.name as departmentName, SUM(r.salary) as utilizedBudget FROM employee e "; 
     query +="LEFT JOIN role r on e.role_id = r.id "; 
@@ -179,7 +179,7 @@ function ViewDeptBudget(){
     });
 }
 
-//update to new role
+//update employee to new role
 async function UpdateRole(){
     let allEmployees = [];
     let rolechoiceA = [];

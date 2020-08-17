@@ -10,7 +10,7 @@ let conn = mysql.createConnection({
     //your username
     user:"root",
     //Enter your password
-    password:"Clara0817+",
+    password:"",
     database:"business_db"
 });
 

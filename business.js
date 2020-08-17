@@ -23,14 +23,14 @@ let conn = mysql.createConnection({
 function startProgram(){
     inquirer.prompt([
         {
-            type: "list",
+            type: "rawlist",
             name:"choice",
             message:"Which would you like to do?",
             choices: [
                 "View all employees",
                 "View all employees by department",
                 "View all employees by manager",
-                "View by Role",
+                "View all employees by Role",
                 "View department budget",
                 "Update Employee Role",
                 "Update Employee Manager",
@@ -97,8 +97,8 @@ function startProgram(){
 function ViewAllEmployees(){
 
     let query = "SELECT e.id , e.first_name, e.last_name, r.title,  d.name as department, r.salary, CONCAT(m.first_name,' ',m.last_name) as manager FROM employee e ";
-    query +="LEFT JOIN role r ON e.role_id = r.id";
-    query +="LEFT JOIN department d ON r.department_id = d.id";
+    query +="LEFT JOIN role r ON e.role_id = r.id ";
+    query +="LEFT JOIN department d ON r.department_id = d.id ";
     query +="LEFT JOIN employee m ON m.id = e.manager_id";
 
     conn.query(query,function(err,res){
@@ -115,9 +115,9 @@ function ViewAllEmployees(){
 //view employees by department
 function ViewByDept(){
 
-    let query = "SELECT d.name AS department, r.title, e.id, e.first_name, e.last_name FROM employee e";
-    query +="LEFT JOIN role r ON (r.id = e.role_id)";
-    query +="LEFT JOIN department d ON (d.id = r.department_id)";
+    let query = "SELECT d.name AS department, r.title, e.id, e.first_name, e.last_name FROM employee e ";
+    query +="LEFT JOIN role r ON (r.id = e.role_id) ";
+    query +="LEFT JOIN department d ON (d.id = r.department_id) ";
     query +="ORDER BY d.name";
 
     conn.query(query,function(err,res){
@@ -134,11 +134,11 @@ function ViewByDept(){
 //view employee by manager
 function ViewByManager(){
 
-    let query ="SELECT CONCAT(m.first_name,' ',m.last_name) AS manager, d.name AS department, e.id, e.first_name, e.last_name, r.title FROM employee e";
-    query +="LEFT JOIN employee m ON m.id = e.manager_id";
-    query +="INNER JOIN role r ON (r.id = e.role_id && e.manager_id != 'NULL')";
-    query +="INNER JOIN department d ON (d.id = r.department_id)";
-    query +="ORDER BY";
+    let query ="SELECT CONCAT(m.first_name,' ',m.last_name) AS manager, d.name AS department, e.id, e.first_name, e.last_name, r.title FROM employee e ";
+    query +="LEFT JOIN employee m ON m.id = e.manager_id ";
+    query +="INNER JOIN role r ON (r.id = e.role_id && e.manager_id != 'NULL') ";
+    query +="INNER JOIN department d ON (d.id = r.department_id) ";
+    query +="ORDER BY manager";
 
     conn.query(query,function(err,res){
         if(err) throw err;
@@ -153,11 +153,11 @@ function ViewByManager(){
 
 //view employees by their role
 function ViewByRole(){
-    let query = "SELECT r.id as roleId,  r.title as roleName, r.salary, r.department_id as departmentId, d.name as departmentName FROM employee e"; 
-    query += "LEFT JOIN role r on e.role_id = r.id" 
+    let query = "SELECT r.id as roleId,  r.title as roleName, r.salary, r.department_id as departmentId, d.name as departmentName FROM employee e "; 
+    query += "LEFT JOIN role r on e.role_id = r.id " 
     query +="LEFT JOIN department d on r.department_id = d.id GROUP BY r.id, r.title";
     
-    connection.query(query, function (err, res){
+    conn.query(query, function (err, res){
         if (err) throw err;
           
         console.log("Viewing By Roles");
@@ -170,8 +170,8 @@ function ViewByRole(){
 
 //view a certain departments budget
 function ViewDeptBudget(){
-    let query = "SELECT d.id ,  d.name as departmentName, SUM(r.salary) as utilizedBudget FROM employee e"; 
-    query +="LEFT JOIN role r on e.role_id = r.id"; 
+    let query = "SELECT d.id ,  d.name as departmentName, SUM(r.salary) as utilizedBudget FROM employee e "; 
+    query +="LEFT JOIN role r on e.role_id = r.id "; 
     query +="LEFT JOIN department d on r.department_id = d.id GROUP BY d.id, d.name";
     
     conn.query(query, function(err, res){
@@ -386,7 +386,7 @@ async function AddRole(){
     let dept = await getAllDept();
 
     for(var i=0; i<dept.length; i++){
-        choiceA.push("ID: " + dept[i].id + "Department Name: " + dept[i].name);
+        choiceA.push("ID: " + dept[i].id + " Department Name: " + dept[i].name);
     }
 
     inquirer.prompt([
@@ -412,10 +412,10 @@ async function AddRole(){
     .then(async function(answer){
         let deptId;
 
-        let departName = answer.deptName.split(" ", 5)[4];
-        const newDeptId = await getDeptByName(departName);
-        newDeptId.find(departId => {
-            deptId = departId.id
+        let depName = answer.deptName.split(" ", 5)[4];
+        const newDeptId = await getDeptByName(depName);
+        newDeptId.find(depId => {
+            deptId = depId.id
         });
 
         conn.query("INSERT INTO role SET ?",
@@ -467,7 +467,7 @@ async function DeleteEmployee(){
     let employee = await getAllEmployees();
 
     for(var i=0; i< employee.length; i++){
-        choiceA.push("ID: " + employee[i].id + "Employee Name: " + employee[i].managerName);
+        choiceA.push("ID: " + employee[i].id + " Employee Name: " + employee[i].managerName);
     }
 
     inquirer.prompt([
@@ -480,11 +480,10 @@ async function DeleteEmployee(){
     ])
     .then(async function(answer){
         let id = answer.employee.split(" ",2)[1];
-        console.log(JSON.parse(id));
 
         conn.query("DELETE FROM employee WHERE ?",
             {
-                id:id
+                id: id
             },
             function(err){
                 if(err) throw err;
@@ -565,7 +564,7 @@ async function DeleteDept(){
         var id = answer.employee.split(" ", 2)[1];
         console.log(JSON.parse(id));
 
-        connection.query("DELETE from department WHERE ?",
+        conn.query("DELETE from department WHERE ?",
             {
                 id : id
             },
@@ -592,7 +591,7 @@ async function DeleteDept(){
 //functions used to find info from the SQL for the other main functions
 async function getAllEmployees(){
     conn.query = util.promisify(conn.query);
-    return await conn.query("SELECT  id, CONCAT(employee.first_name,' ',employee.last_name) as managerName from employee");
+    return await conn.query("SELECT id, CONCAT(employee.first_name,' ',employee.last_name) as managerName from employee");
 }
 
 async function getAllRoles(){
@@ -615,9 +614,9 @@ async function getAllDept() {
     return await conn.query("SELECT id, name from department");  
 }
 
-async function getDeptByName(){
+async function getDeptByName(name){
     conn.query = util.promisify(conn.query);
-    return await conn.query("SELECT * from department where name = ?", [name]);
+    return await conn.query("SELECT * from department where name = ?" , [name]);
 }
 
 //Validate information

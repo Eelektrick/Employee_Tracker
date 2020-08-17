@@ -14,12 +14,6 @@ let conn = mysql.createConnection({
     database:"business_db"
 });
 
-// conn.connect(function(err){
-//     if(err) throw err;
-//     console.log("connected as id" + conn.threadId + "\n");
-//     function startProgram();
-// });
-
 function startProgram(){
     inquirer.prompt([
         {

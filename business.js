@@ -49,7 +49,7 @@ function startProgram(){
             case"View all employees by manager":
             ViewByManager();
             break;
-            case"View by Role":
+            case"View all employees by Role":
             ViewByRole();
             break;
             case"View department budget":

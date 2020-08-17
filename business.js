@@ -187,7 +187,53 @@ function ViewDeptBudget(){
 
 //update to new role
 function UpdateRole(){
+    let allEmployees = [];
+    let rolechoiceA = [];
+    let employee = await getAllEmployees();
+    let role = await getAllRoles();
+  
+    for (var i = 0; i < employee.length; i++) {
+        allEmployees.push("ID: " + employee[i].id + " Employee Name: " + employee[i].managerName);
+    }
+
+    for (var i = 0; i < role.length; i++) {
+        rolechoiceA.push(role[i].title);
+    }
+
+    inquirer.prompt([
+        {
+            name: "employee",
+            type: "rawlist",
+            message: "For which employee, role should be updated?",
+            choices: allEmployees
+        },
+        {
+            name: "employeeRole",
+            type: "rawlist",
+            message: "Please select the role for the selected employee",
+            choices: rolechoiceA
+        }
+    ])
+    .then(async function (answer){
+        let roleId;
+        let newdeptId = await getRoleOnTitle(answer.employeeRole);
+        
+        newdeptId.find(depId => {
+            roleId = depId.id
+        });
+
+        var id = answer.employee.split(" ", 2)[1];
     
+        conn.query("UPDATE employee SET role_id = '" + roleId + "' WHERE id = '" + id + "'",
+
+            function (err) {
+                if (err) throw err;
+
+                console.log("Employee's role got updated successfully!");
+                startProgram();
+            }
+        );
+    });
 }
 
 //update employees manager
